@@ -7,7 +7,8 @@ An interactive visualization tool for understanding how different optimization a
 This project provides:
 - **Multiple Loss Surfaces**: Convex, multi-local-minimum, and non-convex surfaces
 - **Various Optimizers**: SGD, Momentum, Nesterov, AdaGrad, RMSprop, Adam
-- **Interactive Visualization**: 3D surface plots with optimizer trajectories
+- **Interactive Web App**: Beautiful dark-themed UI with real-time visualization
+- **3D Surface Plots**: Interactive 3D visualization with optimizer trajectories
 - **PCA Support**: Dimensionality reduction for higher-dimensional datasets
 
 ## Installation
@@ -19,10 +20,28 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Quick Start
+### 🌐 Web Application (Recommended)
 
 ```bash
-python main.py
+python app.py
+```
+
+Then open **http://127.0.0.1:8050** in your browser.
+
+Features:
+- Toggle multiple optimizers on/off
+- Adjust learning rate and number of steps
+- Choose from 9 different loss surfaces
+- Interactive 3D surface visualization
+- Real-time loss convergence plots
+- Detailed results table
+
+### Command Line
+
+```bash
+python main.py                    # Run demo sequence
+python main.py --demo all         # Run all demos
+python main.py --interactive      # Interactive CLI mode
 ```
 
 ### Jupyter Notebook
@@ -35,11 +54,12 @@ jupyter notebook optimizer_visualizer.ipynb
 
 ```
 MOML/
+├── app.py                # 🌐 Web application (Dash)
 ├── loss_surfaces.py      # Loss surface generators
 ├── optimizers.py         # Gradient descent optimizers
 ├── datasets.py           # Dataset generators and PCA utilities
-├── visualizer.py         # Visualization engine
-├── main.py               # Main application
+├── visualizer.py         # Matplotlib visualization engine
+├── main.py               # Command-line application
 ├── optimizer_visualizer.ipynb  # Interactive notebook
 └── requirements.txt
 ```
