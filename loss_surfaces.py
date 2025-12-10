@@ -209,12 +209,15 @@ class Rosenbrock(LossSurface):
         self.b = b
     
     def __call__(self, x: np.ndarray) -> float:
-        return (self.a - x[0])**2 + self.b * (x[1] - x[0]**2)**2
+        val = (self.a - x[0])**2 + self.b * (x[1] - x[0]**2)**2
+        return np.clip(val, -1e10, 1e10)
     
     def gradient(self, x: np.ndarray) -> np.ndarray:
         dx = -2 * (self.a - x[0]) - 4 * self.b * x[0] * (x[1] - x[0]**2)
         dy = 2 * self.b * (x[1] - x[0]**2)
-        return np.array([dx, dy])
+        grad = np.array([dx, dy])
+        # Clip gradients to prevent numerical overflow
+        return np.clip(grad, -1e6, 1e6)
     
     def get_bounds(self) -> Tuple[float, float, float, float]:
         return (-2, 2, -1, 3)
@@ -243,7 +246,8 @@ class Beale(LossSurface):
         term1 = (1.5 - x[0] + x[0]*x[1])**2
         term2 = (2.25 - x[0] + x[0]*x[1]**2)**2
         term3 = (2.625 - x[0] + x[0]*x[1]**3)**2
-        return term1 + term2 + term3
+        val = term1 + term2 + term3
+        return np.clip(val, -1e10, 1e10)
     
     def gradient(self, x: np.ndarray) -> np.ndarray:
         t1 = 1.5 - x[0] + x[0]*x[1]
@@ -253,7 +257,9 @@ class Beale(LossSurface):
         dx = 2*t1*(x[1]-1) + 2*t2*(x[1]**2-1) + 2*t3*(x[1]**3-1)
         dy = 2*t1*x[0] + 2*t2*2*x[0]*x[1] + 2*t3*3*x[0]*x[1]**2
         
-        return np.array([dx, dy])
+        grad = np.array([dx, dy])
+        # Clip gradients to prevent numerical overflow
+        return np.clip(grad, -1e6, 1e6)
     
     def get_bounds(self) -> Tuple[float, float, float, float]:
         return (-4.5, 4.5, -4.5, 4.5)
@@ -312,7 +318,8 @@ class SixHumpCamel(LossSurface):
         term1 = (4 - 2.1*x1**2 + x1**4/3) * x1**2
         term2 = x1 * x2
         term3 = (-4 + 4*x2**2) * x2**2
-        return term1 + term2 + term3
+        val = term1 + term2 + term3
+        return np.clip(val, -1e10, 1e10)
     
     def gradient(self, x: np.ndarray) -> np.ndarray:
         x1, x2 = x[0], x[1]
@@ -320,7 +327,9 @@ class SixHumpCamel(LossSurface):
         dx1 = 8*x1 - 8.4*x1**3 + 2*x1**5 + x2
         dx2 = x1 - 8*x2 + 16*x2**3
         
-        return np.array([dx1, dx2])
+        grad = np.array([dx1, dx2])
+        # Clip gradients to prevent numerical overflow
+        return np.clip(grad, -1e6, 1e6)
     
     def get_bounds(self) -> Tuple[float, float, float, float]:
         return (-3, 3, -2, 2)

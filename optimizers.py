@@ -81,6 +81,26 @@ class Optimizer(ABC):
         return {"learning_rate": self.learning_rate}
 
 
+class GradientDescent(Optimizer):
+    """
+    Vanilla Gradient Descent
+    
+    Update rule: x_{t+1} = x_t - lr * ∇f(x_t)
+    
+    The simplest optimizer - directly follows the negative gradient.
+    No momentum, no adaptive learning rates.
+    """
+    
+    def __init__(self, learning_rate: float = 0.01):
+        super().__init__(learning_rate, "Gradient Descent")
+    
+    def step(self, x: np.ndarray, gradient: np.ndarray) -> np.ndarray:
+        return x - self.learning_rate * gradient
+    
+    def reset(self):
+        pass  # GD has no state
+
+
 class SGD(Optimizer):
     """
     Stochastic Gradient Descent
@@ -88,6 +108,7 @@ class SGD(Optimizer):
     Update rule: x_{t+1} = x_t - lr * ∇f(x_t)
     
     The simplest optimizer - directly follows the negative gradient.
+    (In this context, same as GD since we're on loss surfaces, not batches)
     """
     
     def __init__(self, learning_rate: float = 0.01):
@@ -426,6 +447,7 @@ def run_optimization(
 def get_all_optimizers(learning_rate: float = 0.01) -> List[Optimizer]:
     """Return instances of all available optimizers."""
     return [
+        GradientDescent(learning_rate=learning_rate),
         SGD(learning_rate=learning_rate),
         Momentum(learning_rate=learning_rate, beta=0.9),
         NesterovMomentum(learning_rate=learning_rate, beta=0.9),
@@ -438,6 +460,8 @@ def get_all_optimizers(learning_rate: float = 0.01) -> List[Optimizer]:
 def get_optimizer_by_name(name: str, **kwargs) -> Optimizer:
     """Get an optimizer instance by name."""
     optimizers = {
+        "gd": GradientDescent,
+        "gradient_descent": GradientDescent,
         "sgd": SGD,
         "momentum": Momentum,
         "nesterov": NesterovMomentum,

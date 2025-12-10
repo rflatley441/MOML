@@ -1,9 +1,5 @@
-#!/usr/bin/env python3
 """
 Optimizer Visualizer - Interactive Web Application
-
-A beautiful, interactive web app for visualizing gradient descent optimizers
-on various loss surfaces.
 """
 
 import numpy as np
@@ -18,7 +14,7 @@ from loss_surfaces import (
     Ackley, Beale, SaddlePoint, SixHumpCamel
 )
 from optimizers import (
-    SGD, Momentum, NesterovMomentum, AdaGrad, RMSprop, Adam,
+    GradientDescent, SGD, Momentum, NesterovMomentum, AdaGrad, RMSprop, Adam,
     run_optimization
 )
 from datasets import (
@@ -43,6 +39,7 @@ LOSS_SURFACES = {
 }
 
 OPTIMIZER_CONFIGS = {
+    "gd": {"name": "Gradient Descent", "class": GradientDescent, "color": "#CC79A7", "default_lr": 0.1},
     "sgd": {"name": "SGD", "class": SGD, "color": "#E69F00", "default_lr": 0.1},
     "momentum": {"name": "Momentum", "class": Momentum, "color": "#56B4E9", "default_lr": 0.1},
     "nesterov": {"name": "Nesterov", "class": NesterovMomentum, "color": "#009E73", "default_lr": 0.1},
@@ -74,6 +71,19 @@ def create_surface_mesh(surface, resolution=80):
     for i in range(resolution):
         for j in range(resolution):
             Z[i, j] = surface(np.array([X[i, j], Y[i, j]]))
+    
+    # Handle NaN and Inf values
+    Z = np.nan_to_num(Z, nan=0.0, posinf=1e10, neginf=-1e10)
+    
+    # Clip extreme values to improve visualization
+    # Use log-scale friendly clipping for surfaces with large value ranges
+    z_min = np.nanmin(Z)
+    z_max = np.nanmax(Z)
+    
+    # If the range is very large, clip to a reasonable percentile
+    if z_max - z_min > 1000:
+        z_clip = np.percentile(Z[np.isfinite(Z)], 95)
+        Z = np.clip(Z, z_min, z_clip)
     
     return X, Y, Z
 
@@ -689,7 +699,7 @@ app.layout = dbc.Container([
                     html.Div([
                         dbc.Checkbox(
                             id=f"opt-{key}",
-                            value=key in ["sgd", "momentum", "adam"],
+                            value=key in ["gd", "momentum", "adam"],
                             className="me-2"
                         ),
                         html.Span("", className="optimizer-color", 
@@ -889,7 +899,7 @@ def run_optimization_callback(n_clicks, surface_key, lr_exp, num_steps, start_x,
     for key, config in selected_optimizers:
         opt_class = config["class"]
         optimizer = opt_class(learning_rate=learning_rate)
-        history = run_optimization(surface, optimizer, initial, num_steps=int(num_steps))
+        history = run_optimization(surface, optimizer, initial, num_steps=int(num_steps), gradient_clip=100.0)
         
         trajectories.append({
             "name": config["name"],
