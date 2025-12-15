@@ -978,7 +978,6 @@ def update_surface_info(surface_key):
 )
 def run_optimization_callback(n_clicks, surface_key, lr_exp, num_steps, start_x, start_y, 
                               show_3d, *optimizer_states):
-    # Get surface
     _, surface = LOSS_SURFACES.get(surface_key, LOSS_SURFACES["quadratic"])
     
     # Learning rate from exponent
@@ -1012,7 +1011,8 @@ def run_optimization_callback(n_clicks, surface_key, lr_exp, num_steps, start_x,
             "gradients": history.gradients,
             "final_loss": history.final_loss,
             "final_position": history.final_position,
-            "steps": len(history.steps)
+            "steps": len(history.steps),
+            "diverged": history.diverged
         })
     
     # Create figures
@@ -1029,10 +1029,26 @@ def run_optimization_callback(n_clicks, surface_key, lr_exp, num_steps, start_x,
     table_rows = []
     for traj in trajectories:
         dist_to_opt = np.linalg.norm(traj["final_position"] - optimal)
+        
+        # Determine status
+        if traj["diverged"]:
+            status = html.Span("Diverged", style={
+                "color": "#ef4444", 
+                "fontWeight": "600",
+                "fontFamily": "JetBrains Mono"
+            })
+        else:
+            status = html.Span("Completed", style={
+                "color": "#22c55e", 
+                "fontWeight": "600",
+                "fontFamily": "JetBrains Mono"
+            })
+        
         table_rows.append(
             html.Tr([
                 html.Td(html.Span("●", style={"color": traj["color"], "fontSize": "1.5rem"})),
                 html.Td(traj["name"], style={"fontFamily": "JetBrains Mono"}),
+                html.Td(status),
                 html.Td(f"{traj['steps']}", style={"fontFamily": "JetBrains Mono"}),
                 html.Td(f"{traj['final_loss']:.6f}", style={"fontFamily": "JetBrains Mono"}),
                 html.Td(f"({traj['final_position'][0]:.4f}, {traj['final_position'][1]:.4f})", 
@@ -1045,6 +1061,7 @@ def run_optimization_callback(n_clicks, surface_key, lr_exp, num_steps, start_x,
         html.Thead(html.Tr([
             html.Th(""),
             html.Th("Optimizer"),
+            html.Th("Status"),
             html.Th("Steps"),
             html.Th("Final Loss"),
             html.Th("Final Position"),
@@ -1082,17 +1099,14 @@ def run_optimization_callback(n_clicks, surface_key, lr_exp, num_steps, start_x,
     )
 
 
-# =============================================================================
-# Run Server
-# =============================================================================
 
 if __name__ == "__main__":
     print("\n" + "="*60)
     print("   OPTIMIZER VISUALIZER - Web Application")
     print("   Math of Machine Learning")
     print("="*60)
-    print("\n🚀 Starting server...")
-    print("📊 Open http://127.0.0.1:8050 in your browser\n")
+    print("\nStarting server...")
+    print("Open http://127.0.0.1:8050 in your browser\n")
     
     app.run(debug=True, host="127.0.0.1", port=8050)
 

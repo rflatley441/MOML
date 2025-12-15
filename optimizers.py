@@ -32,6 +32,7 @@ class OptimizationHistory:
     optimizer_name: str
     initial_position: np.ndarray
     steps: List[OptimizationStep] = field(default_factory=list)
+    diverged: bool = False  # True if optimization went out of bounds
     
     @property
     def positions(self) -> np.ndarray:
@@ -411,6 +412,7 @@ def run_optimization(
     for step in range(num_steps):
         # Check if current position is out of bounds
         if not is_within_bounds(x):
+            history.diverged = True
             break
         
         # Handle Nesterov look-ahead
