@@ -373,7 +373,8 @@ def run_optimization(
     initial_position: np.ndarray,
     num_steps: int = 100,
     convergence_threshold: float = 1e-8,
-    gradient_clip: Optional[float] = None
+    gradient_clip: Optional[float] = None,
+    bounds: Optional[Tuple[float, float, float, float]] = None
 ) -> OptimizationHistory:
     """
     Run optimization on a loss surface.
@@ -385,6 +386,8 @@ def run_optimization(
         num_steps: Maximum number of steps
         convergence_threshold: Stop if loss change < threshold
         gradient_clip: Optional gradient clipping value
+        bounds: Optional (x_min, x_max, y_min, y_max) bounds. If provided,
+                optimization stops when position exits these bounds.
     
     Returns:
         OptimizationHistory with complete trajectory
@@ -398,7 +401,18 @@ def run_optimization(
     x = initial_position.copy()
     prev_loss = float('inf')
     
+    def is_within_bounds(pos: np.ndarray) -> bool:
+        """Check if position is within the specified bounds."""
+        if bounds is None:
+            return True
+        x_min, x_max, y_min, y_max = bounds
+        return (x_min <= pos[0] <= x_max) and (y_min <= pos[1] <= y_max)
+    
     for step in range(num_steps):
+        # Check if current position is out of bounds
+        if not is_within_bounds(x):
+            break
+        
         # Handle Nesterov look-ahead
         if isinstance(optimizer, NesterovMomentum):
             grad_position = optimizer.get_lookahead_position(x)
@@ -431,15 +445,16 @@ def run_optimization(
         # Update position
         x = optimizer.step(x, gradient)
     
-    # Record final position
-    final_loss = loss_surface(x)
-    final_gradient = loss_surface.gradient(x)
-    history.steps.append(OptimizationStep(
-        position=x.copy(),
-        loss=final_loss,
-        gradient=final_gradient.copy(),
-        step_num=len(history.steps)
-    ))
+    # Record final position only if it's within bounds
+    if is_within_bounds(x):
+        final_loss = loss_surface(x)
+        final_gradient = loss_surface.gradient(x)
+        history.steps.append(OptimizationStep(
+            position=x.copy(),
+            loss=final_loss,
+            gradient=final_gradient.copy(),
+            step_num=len(history.steps)
+        ))
     
     return history
 

@@ -10,8 +10,8 @@ from dash import dcc, html, callback, Input, Output, State
 import dash_bootstrap_components as dbc
 
 from loss_surfaces import (
-    QuadraticBowl, EllipticalBowl, Rosenbrock, Rastrigin,
-    Ackley, Beale, SaddlePoint, SixHumpCamel
+    QuadraticBowl, EllipticalBowl, Rastrigin,
+    Ackley, SaddlePoint
 )
 from optimizers import (
     GradientDescent, SGD, Momentum, NesterovMomentum, AdaGrad, RMSprop, Adam,
@@ -30,11 +30,8 @@ LOSS_SURFACES = {
     "quadratic": ("Quadratic Bowl (Convex)", QuadraticBowl(a=1.0, b=1.0)),
     "quadratic_ill": ("Ill-Conditioned Quadratic", QuadraticBowl(a=1.0, b=10.0)),
     "elliptical": ("Elliptical Bowl (Rotated)", EllipticalBowl(a=1.0, b=10.0)),
-    "rosenbrock": ("Rosenbrock (Banana Valley)", Rosenbrock(a=1.0, b=100.0)),
     "rastrigin": ("Rastrigin (Many Local Minima)", Rastrigin(A=10.0)),
     "ackley": ("Ackley (Deep Center)", Ackley()),
-    "six_hump": ("Six-Hump Camel", SixHumpCamel()),
-    "beale": ("Beale Function", Beale()),
     "saddle": ("Saddle Point", SaddlePoint()),
 }
 
@@ -686,7 +683,7 @@ app.layout = dbc.Container([
                 dbc.Select(
                     id="surface-select",
                     options=[{"label": v[0], "value": k} for k, v in LOSS_SURFACES.items()],
-                    value="rosenbrock",
+                    value="quadratic",
                     className="mb-3"
                 ),
                 html.Div(id="surface-info", className="text-muted small")
@@ -877,7 +874,7 @@ def update_surface_info(surface_key):
 def run_optimization_callback(n_clicks, surface_key, lr_exp, num_steps, start_x, start_y, 
                               show_3d, *optimizer_states):
     # Get surface
-    _, surface = LOSS_SURFACES.get(surface_key, LOSS_SURFACES["rosenbrock"])
+    _, surface = LOSS_SURFACES.get(surface_key, LOSS_SURFACES["quadratic"])
     
     # Learning rate from exponent
     learning_rate = 10 ** lr_exp
@@ -896,10 +893,11 @@ def run_optimization_callback(n_clicks, surface_key, lr_exp, num_steps, start_x,
     
     # Run optimizations
     trajectories = []
+    bounds = surface.get_bounds()
     for key, config in selected_optimizers:
         opt_class = config["class"]
         optimizer = opt_class(learning_rate=learning_rate)
-        history = run_optimization(surface, optimizer, initial, num_steps=int(num_steps), gradient_clip=100.0)
+        history = run_optimization(surface, optimizer, initial, num_steps=int(num_steps), gradient_clip=100.0, bounds=bounds)
         
         trajectories.append({
             "name": config["name"],
