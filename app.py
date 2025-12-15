@@ -820,7 +820,115 @@ app.layout = dbc.Container([
         ], md=9),
     ]),
     
-    # Footer
+    # Educational Section
+    dbc.Row([
+        dbc.Col([
+            html.Div([
+                html.H3("How to Use This Visualizer", className="mb-4", 
+                       style={"color": "#6366f1", "fontWeight": "600"}),
+                
+                dbc.Accordion([
+                    dbc.AccordionItem([
+                        html.P([
+                            "When training machine learning models, we use ", 
+                            html.Strong("gradient descent"), 
+                            " to find parameters that minimize a loss function. The optimizer starts at some point "
+                            "and iteratively moves in the direction that reduces the loss."
+                        ]),
+                        html.P([
+                            "This app lets you ", html.Strong("visualize"), " how different optimization algorithms "
+                            "navigate various loss surfaces. Each colored path shows how an optimizer moves through "
+                            "the parameter space, trying to find the minimum (marked with a red X)."
+                        ]),
+                        html.P([
+                            html.Strong("The 3D surface"), " shows the loss value (height) at each point in parameter space. ",
+                            html.Strong("The loss curve"), " shows how quickly the loss decreases over iterations. ",
+                            html.Strong("The gradient magnitude"), " shows the strength of the gradient at each step."
+                        ]),
+                    ], title="What Am I Looking At?"),
+                    
+                    dbc.AccordionItem([
+                        html.Div([
+                            html.H6("Gradient Descent", className="mt-2", style={"color": "#CC79A7"}),
+                            html.P("The simplest approach: x ← x - lr × ∇f(x). Moves directly opposite to the gradient.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Momentum", style={"color": "#56B4E9"}),
+                            html.P("Adds a velocity term that accumulates over time. Helps smooth out oscillations and build speed in consistent directions.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Nesterov", style={"color": "#009E73"}),
+                            html.P("\"Smarter\" momentum that computes the gradient at a look-ahead position. Often converges faster than standard momentum.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("AdaGrad", style={"color": "#F0E442"}),
+                            html.P("Adapts the learning rate for each parameter based on historical gradients. Good for sparse data, but learning rate can decay too fast.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("RMSprop", style={"color": "#0072B2"}),
+                            html.P("Uses exponential moving average of squared gradients. Fixes AdaGrad's aggressive learning rate decay.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Adam", style={"color": "#D55E00"}),
+                            html.P("Combines momentum (1st moment) with RMSprop (2nd moment). The most popular optimizer in deep learning.", 
+                                  className="small mb-3"),
+                        ])
+                    ], title="The Optimizers Explained"),
+                    
+                    dbc.AccordionItem([
+                        html.Div([
+                            html.H6("Quadratic Bowl (Convex)", className="mt-2"),
+                            html.P("A simple parabola with a single global minimum. All optimizers should converge here.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Ill-Conditioned Quadratic"),
+                            html.P("An elongated bowl where one direction is much steeper than the other. Watch how SGD oscillates while momentum-based methods smooth out the path.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Rastrigin (Many Local Minima)"),
+                            html.P("A bumpy surface with many local minima. Tests whether optimizers can escape local traps. Momentum helps!", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Ackley (Deep Center)"),
+                            html.P("Nearly flat outer regions with a deep hole at the center. Tests behavior with vanishing gradients.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Saddle Point"),
+                            html.P("A horse-saddle shape where the gradient is zero at the origin, but it's not a minimum. Watch how optimizers behave at saddle points.", 
+                                  className="small mb-3"),
+                        ])
+                    ], title="Loss Surfaces Explained"),
+                    
+                    dbc.AccordionItem([
+                        html.Div([
+                            html.H6("Experiment 1: Learning Rate Effects", className="mt-2"),
+                            html.P("Use the Quadratic Bowl. Try learning rates from 10⁻⁴ (very slow) to 10⁰ (may diverge!). Find the sweet spot.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Experiment 2: Momentum vs Oscillation"),
+                            html.P("Use the Ill-Conditioned Quadratic. Compare SGD (oscillates) vs Momentum (smooth path). This shows why momentum matters!", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Experiment 3: Escaping Local Minima"),
+                            html.P("Use Rastrigin. Start from (-2, 2). See which optimizers get stuck vs escape. Momentum-based methods usually do better.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Experiment 4: Saddle Point Behavior"),
+                            html.P("Use Saddle Point. Start from (0.1, 0.1) near the saddle. Watch how different optimizers handle this tricky landscape.", 
+                                  className="small mb-3"),
+                            
+                            html.H6("Experiment 5: Adam's Stability"),
+                            html.P("Try high learning rates (10⁻¹ or higher) on different surfaces. Notice how Adam tends to be more stable than basic SGD.", 
+                                  className="small mb-3"),
+                        ])
+                    ], title="Try These Experiments"),
+                    
+                ], start_collapsed=True, className="mb-4"),
+                
+            ], className="control-card mt-4")
+        ], width=12)
+    ]),
+    
     dbc.Row([
         dbc.Col([
             html.Hr(style={"borderColor": "#2d2d3a"}),
@@ -832,9 +940,6 @@ app.layout = dbc.Container([
 ], fluid=True, className="px-4")
 
 
-# =============================================================================
-# Callbacks
-# =============================================================================
 
 @callback(
     Output("surface-info", "children"),
