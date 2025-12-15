@@ -17,11 +17,6 @@ from optimizers import (
     GradientDescent, SGD, Momentum, NesterovMomentum, AdaGrad, RMSprop, Adam,
     run_optimization
 )
-from datasets import (
-    generate_linear_separable, generate_moons, generate_circles,
-    generate_xor, generate_spiral, LogisticRegressionLoss
-)
-
 # =============================================================================
 # Configuration
 # =============================================================================
@@ -43,14 +38,6 @@ OPTIMIZER_CONFIGS = {
     "adagrad": {"name": "AdaGrad", "class": AdaGrad, "color": "#F0E442", "default_lr": 0.5},
     "rmsprop": {"name": "RMSprop", "class": RMSprop, "color": "#0072B2", "default_lr": 0.1},
     "adam": {"name": "Adam", "class": Adam, "color": "#D55E00", "default_lr": 0.1},
-}
-
-DATASETS = {
-    "linear": ("Linear Separable", lambda: generate_linear_separable(n_samples=200, noise=0.3)),
-    "moons": ("Two Moons", lambda: generate_moons(n_samples=200, noise=0.1)),
-    "circles": ("Concentric Circles", lambda: generate_circles(n_samples=200, noise=0.05)),
-    "xor": ("XOR Pattern", lambda: generate_xor(n_samples=200, noise=0.1)),
-    "spiral": ("Spiral", lambda: generate_spiral(n_samples=200, noise=0.05)),
 }
 
 # =============================================================================

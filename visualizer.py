@@ -18,21 +18,19 @@ from mpl_toolkits.mplot3d import Axes3D
 from typing import List, Optional, Tuple, Dict
 import warnings
 
-# Suppress matplotlib warnings
+#  matplotlib warnings
 warnings.filterwarnings('ignore', category=UserWarning)
 
-# Color palette for optimizers (colorblind-friendly)
 OPTIMIZER_COLORS = {
-    'SGD': '#E69F00',        # Orange
-    'Momentum': '#56B4E9',   # Sky blue
-    'Nesterov': '#009E73',   # Bluish green
-    'AdaGrad': '#F0E442',    # Yellow
-    'RMSprop': '#0072B2',    # Blue
-    'Adam': '#D55E00',       # Vermillion
-    'AdamW': '#CC79A7',      # Reddish purple
+    'SGD': '#E69F00',        
+    'Momentum': '#56B4E9',   
+    'Nesterov': '#009E73',  
+    'AdaGrad': '#F0E442',    
+    'RMSprop': '#0072B2',    
+    'Adam': '#D55E00',      
+    'AdamW': '#CC79A7',     
 }
 
-# Fallback colors
 DEFAULT_COLORS = plt.cm.tab10.colors
 
 
@@ -95,7 +93,7 @@ class SurfaceVisualizer:
             fig = plt.figure(figsize=(10, 8))
             ax = fig.add_subplot(111, projection='3d')
         
-        # Plot surface
+        #  surface
         surf = ax.plot_surface(
             self.X, self.Y, self.Z,
             cmap=cmap,
@@ -104,14 +102,14 @@ class SurfaceVisualizer:
             antialiased=True
         )
         
-        # Plot trajectories
+        #  trajectories
         if trajectories:
             for idx, history in enumerate(trajectories):
                 positions = history.positions
                 losses = history.losses
                 color = get_optimizer_color(history.optimizer_name, idx)
                 
-                # Plot trajectory line
+                #  trajectory line
                 ax.plot(
                     positions[:, 0], positions[:, 1], losses,
                     color=color,
@@ -120,21 +118,21 @@ class SurfaceVisualizer:
                     zorder=10
                 )
                 
-                # Plot start point
+                #  start point
                 ax.scatter(
                     [positions[0, 0]], [positions[0, 1]], [losses[0]],
                     color=color, s=100, marker='o', edgecolors='white',
                     linewidths=2, zorder=11
                 )
                 
-                # Plot end point
+                #  end point
                 ax.scatter(
                     [positions[-1, 0]], [positions[-1, 1]], [losses[-1]],
                     color=color, s=100, marker='*', edgecolors='white',
                     linewidths=2, zorder=11
                 )
         
-        # Labels and title
+    
         ax.set_xlabel('$w_1$', fontsize=12)
         ax.set_ylabel('$w_2$', fontsize=12)
         ax.set_zlabel('Loss', fontsize=12)
@@ -176,12 +174,11 @@ class SurfaceVisualizer:
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 8))
         
-        # Prepare Z for plotting
+        # prep Z for plotting
         Z_plot = self.Z.copy()
         if log_scale:
             Z_plot = np.log1p(Z_plot)
         
-        # Plot filled contours
         contour = ax.contourf(
             self.X, self.Y, Z_plot,
             levels=levels,
@@ -189,7 +186,6 @@ class SurfaceVisualizer:
             alpha=0.8
         )
         
-        # Plot contour lines
         ax.contour(
             self.X, self.Y, Z_plot,
             levels=levels,
@@ -198,10 +194,9 @@ class SurfaceVisualizer:
             linewidths=0.5
         )
         
-        # Colorbar
         plt.colorbar(contour, ax=ax, label='Loss' + (' (log)' if log_scale else ''))
         
-        # Gradient field
+        # gradient field
         if show_gradient_field:
             skip = max(1, self.resolution // 15)
             U = np.zeros_like(self.X)
@@ -212,7 +207,7 @@ class SurfaceVisualizer:
                     grad = self.loss_surface.gradient(
                         np.array([self.X[i, j], self.Y[i, j]])
                     )
-                    # Normalize for visualization
+                    # normalize for visualization
                     norm = np.linalg.norm(grad)
                     if norm > 0:
                         U[i, j] = -grad[0] / norm
@@ -224,13 +219,11 @@ class SurfaceVisualizer:
                 color='white', alpha=0.5, scale=25
             )
         
-        # Plot trajectories
         if trajectories:
             for idx, history in enumerate(trajectories):
                 positions = history.positions
                 color = get_optimizer_color(history.optimizer_name, idx)
                 
-                # Plot trajectory line
                 ax.plot(
                     positions[:, 0], positions[:, 1],
                     color=color,
@@ -239,27 +232,23 @@ class SurfaceVisualizer:
                     zorder=10
                 )
                 
-                # Plot points along trajectory
                 ax.scatter(
                     positions[::5, 0], positions[::5, 1],
                     color=color, s=20, alpha=0.6, zorder=9
                 )
                 
-                # Start point (circle)
                 ax.scatter(
                     [positions[0, 0]], [positions[0, 1]],
                     color=color, s=150, marker='o', edgecolors='white',
                     linewidths=2, zorder=11
                 )
                 
-                # End point (star)
                 ax.scatter(
                     [positions[-1, 0]], [positions[-1, 1]],
                     color=color, s=200, marker='*', edgecolors='white',
                     linewidths=2, zorder=11
                 )
         
-        # Plot optimal point if known
         optimal = self.loss_surface.get_optimal()
         ax.scatter(
             [optimal[0]], [optimal[1]],
@@ -267,7 +256,6 @@ class SurfaceVisualizer:
             linewidths=2, zorder=12, label='Optimal'
         )
         
-        # Labels and title
         ax.set_xlabel('$w_1$', fontsize=12)
         ax.set_ylabel('$w_2$', fontsize=12)
         ax.set_xlim(self.x_min, self.x_max)
@@ -372,28 +360,22 @@ def create_comparison_figure(
     """
     fig = plt.figure(figsize=figsize)
     
-    # Create grid
     gs = fig.add_gridspec(2, 2, hspace=0.3, wspace=0.3)
     
     visualizer = SurfaceVisualizer(loss_surface)
     
-    # 3D surface (top-left)
     ax1 = fig.add_subplot(gs[0, 0], projection='3d')
     visualizer.plot_surface_3d(ax=ax1, trajectories=trajectories)
     
-    # 2D contour (top-right)
     ax2 = fig.add_subplot(gs[0, 1])
     visualizer.plot_contour(ax=ax2, trajectories=trajectories)
     
-    # Loss curves (bottom-left)
     ax3 = fig.add_subplot(gs[1, 0])
     visualizer.plot_loss_curves(trajectories, ax=ax3)
     
-    # Gradient norms (bottom-right)
     ax4 = fig.add_subplot(gs[1, 1])
     visualizer.plot_gradient_norms(trajectories, ax=ax4)
     
-    # Overall title
     fig.suptitle(
         f"Optimizer Comparison on {loss_surface.name}",
         fontsize=16, fontweight='bold', y=0.98
@@ -415,13 +397,10 @@ def create_animation(
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
     
-    # Find max steps
     max_steps = max(len(h.steps) for h in trajectories)
     
-    # Plot static contour
     visualizer.plot_contour(ax=ax1, title="Optimization Progress")
     
-    # Initialize trajectory lines
     lines = []
     points = []
     for idx, history in enumerate(trajectories):
@@ -433,7 +412,6 @@ def create_animation(
     
     ax1.legend(loc='upper right')
     
-    # Loss plot
     loss_lines = []
     for idx, history in enumerate(trajectories):
         color = get_optimizer_color(history.optimizer_name, idx)
@@ -454,14 +432,11 @@ def create_animation(
             positions = history.positions
             losses = history.losses
             
-            # Limit to current frame
             n = min(frame + 1, len(positions))
             
-            # Update trajectory
             lines[idx].set_data(positions[:n, 0], positions[:n, 1])
             points[idx].set_data([positions[n-1, 0]], [positions[n-1, 1]])
             
-            # Update loss curve
             loss_lines[idx].set_data(np.arange(n), losses[:n])
         
         return lines + points + loss_lines
@@ -516,26 +491,21 @@ def create_optimizer_summary_table(trajectories: List) -> str:
 
 
 if __name__ == "__main__":
-    # Demo visualization
     from loss_surfaces import Rosenbrock, QuadraticBowl, Rastrigin
     from optimizers import get_all_optimizers, run_optimization
     
     print("Creating demo visualization...")
     
-    # Test on Rosenbrock
     surface = Rosenbrock()
     initial = np.array([-1.5, 1.5])
     
-    # Run all optimizers
     trajectories = []
     for opt in get_all_optimizers(learning_rate=0.001):
         history = run_optimization(surface, opt, initial, num_steps=500)
         trajectories.append(history)
     
-    # Create comparison figure
     fig = create_comparison_figure(surface, trajectories)
     
-    # Print summary
     print("\n" + create_optimizer_summary_table(trajectories))
     
     plt.tight_layout()

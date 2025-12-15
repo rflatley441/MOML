@@ -174,8 +174,7 @@ class NesterovMomentum(Optimizer):
         if self.velocity is None:
             self.velocity = np.zeros_like(x)
         
-        # For NAG, the gradient passed should be computed at x - lr*beta*v
-        # We handle this in the optimization loop
+
         self.velocity = self.beta * self.velocity + gradient
         return x - self.learning_rate * self.velocity
     
@@ -207,7 +206,7 @@ class AdaGrad(Optimizer):
     def __init__(self, learning_rate: float = 0.01, epsilon: float = 1e-8):
         super().__init__(learning_rate, "AdaGrad")
         self.epsilon = epsilon
-        self.G = None  # Accumulated squared gradients
+        self.G = None 
     
     def step(self, x: np.ndarray, gradient: np.ndarray) -> np.ndarray:
         if self.G is None:
@@ -240,7 +239,7 @@ class RMSprop(Optimizer):
         super().__init__(learning_rate, "RMSprop")
         self.beta = beta
         self.epsilon = epsilon
-        self.E_g2 = None  # Exponential moving average of squared gradients
+        self.E_g2 = None  # exponential moving average of squared gradients
     
     def step(self, x: np.ndarray, gradient: np.ndarray) -> np.ndarray:
         if self.E_g2 is None:
@@ -496,7 +495,6 @@ def get_optimizer_by_name(name: str, **kwargs) -> Optimizer:
 
 
 if __name__ == "__main__":
-    # Test optimizers on a simple quadratic
     from loss_surfaces import QuadraticBowl
     
     print("Testing Optimizers on Quadratic Bowl\n" + "="*50)

@@ -176,10 +176,8 @@ class Ackley(LossSurface):
         
         sqrt_term = np.sqrt(sum_sq / n) if sum_sq > 0 else 1e-10
         
-        # Gradient of term1
         grad1 = self.a * self.b * np.exp(-self.b * sqrt_term) * x / (n * sqrt_term)
         
-        # Gradient of term2
         grad2 = np.exp(sum_cos / n) * self.c * np.sin(self.c * x) / n
         
         return grad1 + grad2
@@ -216,7 +214,6 @@ class Rosenbrock(LossSurface):
         dx = -2 * (self.a - x[0]) - 4 * self.b * x[0] * (x[1] - x[0]**2)
         dy = 2 * self.b * (x[1] - x[0]**2)
         grad = np.array([dx, dy])
-        # Clip gradients to prevent numerical overflow
         return np.clip(grad, -1e6, 1e6)
     
     def get_bounds(self) -> Tuple[float, float, float, float]:
@@ -258,7 +255,6 @@ class Beale(LossSurface):
         dy = 2*t1*x[0] + 2*t2*2*x[0]*x[1] + 2*t3*3*x[0]*x[1]**2
         
         grad = np.array([dx, dy])
-        # Clip gradients to prevent numerical overflow
         return np.clip(grad, -1e6, 1e6)
     
     def get_bounds(self) -> Tuple[float, float, float, float]:
