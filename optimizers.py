@@ -8,7 +8,6 @@ This module implements various optimization algorithms for gradient descent:
 - AdaGrad
 - RMSprop
 - Adam
-- AdamW (Adam with weight decay)
 """
 
 import numpy as np
@@ -313,60 +312,6 @@ class Adam(Optimizer):
         }
 
 
-class AdamW(Optimizer):
-    """
-    Adam with Decoupled Weight Decay
-    
-    Like Adam, but applies weight decay directly to parameters
-    instead of through the gradient (L2 regularization).
-    
-    Update rule includes: x_{t+1} = x_{t+1} - lr * λ * x_t
-    """
-    
-    def __init__(self, learning_rate: float = 0.001, beta1: float = 0.9,
-                 beta2: float = 0.999, epsilon: float = 1e-8, weight_decay: float = 0.01):
-        super().__init__(learning_rate, "AdamW")
-        self.beta1 = beta1
-        self.beta2 = beta2
-        self.epsilon = epsilon
-        self.weight_decay = weight_decay
-        self.m = None
-        self.v = None
-        self.t = 0
-    
-    def step(self, x: np.ndarray, gradient: np.ndarray) -> np.ndarray:
-        if self.m is None:
-            self.m = np.zeros_like(x)
-            self.v = np.zeros_like(x)
-        
-        self.t += 1
-        
-        self.m = self.beta1 * self.m + (1 - self.beta1) * gradient
-        self.v = self.beta2 * self.v + (1 - self.beta2) * gradient ** 2
-        
-        m_hat = self.m / (1 - self.beta1 ** self.t)
-        v_hat = self.v / (1 - self.beta2 ** self.t)
-        
-        # Adam update + weight decay
-        x_new = x - self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
-        x_new = x_new - self.learning_rate * self.weight_decay * x
-        
-        return x_new
-    
-    def reset(self):
-        self.m = None
-        self.v = None
-        self.t = 0
-    
-    def get_params(self) -> Dict[str, Any]:
-        return {
-            "learning_rate": self.learning_rate,
-            "beta1": self.beta1,
-            "beta2": self.beta2,
-            "weight_decay": self.weight_decay
-        }
-
-
 def run_optimization(
     loss_surface,
     optimizer: Optimizer,
@@ -484,7 +429,6 @@ def get_optimizer_by_name(name: str, **kwargs) -> Optimizer:
         "adagrad": AdaGrad,
         "rmsprop": RMSprop,
         "adam": Adam,
-        "adamw": AdamW,
     }
     
     name_lower = name.lower()

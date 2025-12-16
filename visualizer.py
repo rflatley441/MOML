@@ -28,7 +28,6 @@ OPTIMIZER_COLORS = {
     'AdaGrad': '#F0E442',    
     'RMSprop': '#0072B2',    
     'Adam': '#D55E00',      
-    'AdamW': '#CC79A7',     
 }
 
 DEFAULT_COLORS = plt.cm.tab10.colors
