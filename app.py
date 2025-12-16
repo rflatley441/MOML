@@ -910,7 +910,7 @@ app.layout = dbc.Container([
                         ])
                     ], title="Try These Experiments"),
                     
-                ], start_collapsed=True, className="mb-4"),
+                ], start_collapsed=True, always_open=True, className="mb-4"),
                 
             ], className="control-card mt-4")
         ], width=12)
